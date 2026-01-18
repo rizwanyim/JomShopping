@@ -54,14 +54,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Kita set satu ID tetap untuk app personal
+// Kita tetapkan satu ID tetap untuk sistem ini
 const appId = "jomshopping-live"; 
 
 // --- Styling Constants ---
 const CATEGORIES = [
   { id: 'basah', name: '🐟 Basah', color: 'bg-blue-50 text-blue-600 border-blue-100 ring-blue-500' },
   { id: 'kering', name: '🥫 Kering', color: 'bg-orange-50 text-orange-600 border-orange-100 ring-orange-500' },
-  { id: 'sayur', name: '🥬 Sayur & Buah', color: 'bg-emerald-50 text-emerald-600 border-emerald-100 ring-emerald-500' },
+  { id: 'sayur', name: '🥬 Sayur', color: 'bg-emerald-50 text-emerald-600 border-emerald-100 ring-emerald-500' },
   { id: 'rumah', name: '🧻 Rumah', color: 'bg-purple-50 text-purple-600 border-purple-100 ring-purple-500' },
   { id: 'lain', name: '⚡ Lain', color: 'bg-gray-50 text-gray-600 border-gray-100 ring-gray-500' },
 ];
@@ -70,6 +70,7 @@ const CATEGORIES = [
 const SmartToolsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   const [activeTab, setActiveTab] = useState<'calc' | 'compare'>('compare');
   
+  // State for Compare
   const [priceA, setPriceA] = useState('');
   const [weightA, setWeightA] = useState('');
   const [unitA, setUnitA] = useState('g'); 
@@ -78,13 +79,14 @@ const SmartToolsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
   const [weightB, setWeightB] = useState('');
   const [unitB, setUnitB] = useState('g'); 
 
+  // State for Calculator
   const [calcDisplay, setCalcDisplay] = useState('');
 
   if (!isOpen) return null;
 
   const getMultiplier = (unit: string) => {
     if (unit === 'kg' || unit === 'L') return 1000;
-    return 1; 
+    return 1; // g, ml, pcs
   };
 
   const calculateScore = (price: string, weight: string, unit: string) => {
@@ -154,6 +156,8 @@ const SmartToolsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
   return (
     <div className="fixed inset-0 bg-slate-900/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in zoom-in-95 duration-200">
       <div className="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        
+        {/* Header */}
         <div className="bg-slate-800 p-4 flex justify-between items-center text-white">
           <h3 className="font-bold flex items-center gap-2">
             {activeTab === 'compare' ? <Scale className="w-5 h-5 text-emerald-400" /> : <Calculator className="w-5 h-5 text-blue-400" />}
@@ -161,14 +165,20 @@ const SmartToolsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
           </h3>
           <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-full"><X className="w-5 h-5" /></button>
         </div>
+
+        {/* Tabs */}
         <div className="flex p-2 bg-slate-100 gap-2">
           <button onClick={() => setActiveTab('compare')} className={`flex-1 py-2 rounded-xl text-sm font-bold transition ${activeTab === 'compare' ? 'bg-white shadow text-slate-800' : 'text-slate-400'}`}>Banding Murah</button>
           <button onClick={() => setActiveTab('calc')} className={`flex-1 py-2 rounded-xl text-sm font-bold transition ${activeTab === 'calc' ? 'bg-white shadow text-slate-800' : 'text-slate-400'}`}>Kalkulator</button>
         </div>
+
+        {/* Content */}
         <div className="p-5 overflow-y-auto">
           {activeTab === 'compare' ? (
             <div className="space-y-4">
               <p className="text-xs text-center text-slate-400 mb-2">Boleh campur unit (contoh: 1kg vs 850g).</p>
+              
+              {/* Item A */}
               <div className={`p-4 rounded-2xl border-2 transition relative ${winner === 'A' ? 'bg-emerald-50 border-emerald-500 shadow-lg scale-[1.02]' : 'bg-white border-slate-100'}`}>
                 {winner === 'A' && <div className="absolute -top-3 right-4 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow">MENANG!</div>}
                 <div className="text-xs font-bold text-slate-400 uppercase mb-2">Barang A</div>
@@ -183,7 +193,12 @@ const SmartToolsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
                   </div>
                 </div>
               </div>
-              <div className="flex justify-center -my-2 relative z-10"><div className="bg-slate-200 text-slate-500 text-xs font-bold px-2 py-1 rounded-full border-2 border-white">VS</div></div>
+
+              <div className="flex justify-center -my-2 relative z-10">
+                <div className="bg-slate-200 text-slate-500 text-xs font-bold px-2 py-1 rounded-full border-2 border-white">VS</div>
+              </div>
+
+              {/* Item B */}
               <div className={`p-4 rounded-2xl border-2 transition relative ${winner === 'B' ? 'bg-emerald-50 border-emerald-500 shadow-lg scale-[1.02]' : 'bg-white border-slate-100'}`}>
                 {winner === 'B' && <div className="absolute -top-3 right-4 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow">MENANG!</div>}
                 <div className="text-xs font-bold text-slate-400 uppercase mb-2">Barang B</div>
@@ -198,11 +213,15 @@ const SmartToolsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
                   </div>
                 </div>
               </div>
+
               {winner && (
                  <div className="text-center mt-4 animate-in slide-in-from-bottom-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
                     <p className="text-slate-600 text-sm font-medium">
                       {winner === 'Draw' ? 'Harga per unit sama sahaja.' : 
-                        <>Pilih <span className="font-black text-emerald-600">Barang {winner}</span>.<br/><span className="text-xs text-slate-400">Lebih jimat {savings.toFixed(1)}% berbanding Barang {winner === 'A' ? 'B' : 'A'}.</span></>
+                        <>
+                           Pilih <span className="font-black text-emerald-600">Barang {winner}</span>.<br/>
+                           <span className="text-xs text-slate-400">Lebih jimat {savings.toFixed(1)}% berbanding Barang {winner === 'A' ? 'B' : 'A'}.</span>
+                        </>
                       }
                     </p>
                  </div>
@@ -210,10 +229,21 @@ const SmartToolsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="w-full bg-slate-100 p-4 rounded-xl text-right text-2xl font-mono font-bold text-slate-700 h-16 flex items-center justify-end overflow-x-auto">{calcDisplay || '0'}</div>
+              <div className="w-full bg-slate-100 p-4 rounded-xl text-right text-2xl font-mono font-bold text-slate-700 h-16 flex items-center justify-end overflow-x-auto">
+                {calcDisplay || '0'}
+              </div>
               <div className="grid grid-cols-4 gap-2">
                 {['7','8','9','/','4','5','6','*','1','2','3','-','C','0','.','+'].map(btn => (
-                  <button key={btn} onClick={() => handleCalcPress(btn)} className={`p-4 rounded-xl font-bold text-lg shadow-sm active:scale-95 transition ${['/','*','-','+'].includes(btn) ? 'bg-blue-100 text-blue-600' : btn === 'C' ? 'bg-rose-100 text-rose-600' : 'bg-slate-50 text-slate-700'}`}>{btn}</button>
+                  <button 
+                    key={btn}
+                    onClick={() => handleCalcPress(btn)}
+                    className={`p-4 rounded-xl font-bold text-lg shadow-sm active:scale-95 transition ${
+                      ['/','*','-','+'].includes(btn) ? 'bg-blue-100 text-blue-600' : 
+                      btn === 'C' ? 'bg-rose-100 text-rose-600' : 'bg-slate-50 text-slate-700'
+                    }`}
+                  >
+                    {btn}
+                  </button>
                 ))}
                 <button onClick={() => handleCalcPress('=')} className="col-span-4 bg-emerald-500 text-white p-3 rounded-xl font-bold shadow-lg shadow-emerald-200 mt-2 active:scale-95">=</button>
               </div>
@@ -244,18 +274,32 @@ const JoinScreen = ({ onJoin }: { onJoin: (code: string) => void }) => {
         <div className="bg-gradient-to-tr from-emerald-400 to-teal-500 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/30 transform -translate-y-12 border-4 border-white">
           <ShoppingBasket className="w-12 h-12 text-white" />
         </div>
+        
         <div className="-mt-8 mb-8">
           <h1 className="text-4xl font-black text-gray-800 tracking-tight mb-1">Jom<span className="text-emerald-500">Shop</span></h1>
           <p className="text-gray-400 font-medium text-sm">Sync Barang Dapur Suami Isteri</p>
         </div>
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative group">
-            <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder="NAMA BILIK (CTH: SYURGAKU)" className="w-full px-4 py-5 rounded-2xl bg-gray-50 border-2 border-gray-100 focus:border-emerald-500 focus:bg-white outline-none transition uppercase text-center text-lg font-bold tracking-widest text-emerald-900 placeholder-gray-300 shadow-inner group-hover:bg-white" required />
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="NAMA BILIK (CTH: SYURGAKU)"
+              className="w-full px-4 py-5 rounded-2xl bg-gray-50 border-2 border-gray-100 focus:border-emerald-500 focus:bg-white outline-none transition uppercase text-center text-lg font-bold tracking-widest text-emerald-900 placeholder-gray-300 shadow-inner group-hover:bg-white"
+              required
+            />
           </div>
-          <button type="submit" className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-5 px-6 rounded-2xl transition transform active:scale-95 shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2">Mula Shopping <ArrowRight className="w-5 h-5" /></button>
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-5 px-6 rounded-2xl transition transform active:scale-95 shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2"
+          >
+            Mula Shopping <ArrowRight className="w-5 h-5" />
+          </button>
         </form>
       </div>
-      <p className="absolute bottom-6 text-emerald-100/60 text-xs font-medium">Ultimate Edition V2 (Deploy)</p>
+      <p className="absolute bottom-6 text-emerald-100/60 text-xs font-medium">Ultimate Edition V3</p>
     </div>
   );
 };
@@ -511,4 +555,5 @@ export default function App() {
   const handleLeave = () => { localStorage.removeItem('jomShoppingCodeV3'); setListCode(null); };
   if (!listCode) return <JoinScreen onJoin={handleJoin} />;
   return <ShoppingList listCode={listCode} onLeave={handleLeave} />;
+}
 }
